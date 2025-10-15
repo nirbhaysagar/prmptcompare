@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth-provider'
+import { UnifiedLayout } from '@/components/unified-layout'
 import { PromptWorkspace } from '@/components/prompt-workspace'
 
 export default function DashboardPage() {
@@ -28,8 +29,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <UnifiedLayout currentPage="dashboard">
       <PromptWorkspace />
-    </div>
+    </UnifiedLayout>
   )
 }

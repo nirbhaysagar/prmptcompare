@@ -17,7 +17,7 @@ import {
   BarChart3,
   PieChart
 } from 'lucide-react'
-import { Navigation } from '@/components/navigation'
+import { UnifiedLayout } from '@/components/unified-layout'
 
 interface CostBreakdown {
   date: string
@@ -137,10 +137,7 @@ export default function CostAnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <UnifiedLayout currentPage="costs">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -428,7 +425,6 @@ export default function CostAnalyticsPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </UnifiedLayout>
   )
 }

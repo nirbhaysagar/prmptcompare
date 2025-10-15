@@ -17,7 +17,7 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react'
-import { Navigation } from '@/components/navigation'
+import { UnifiedLayout } from '@/components/unified-layout'
 
 interface AnalyticsData {
   totalPrompts: number
@@ -113,10 +113,7 @@ export default function AnalyticsPage() {
   if (!analytics) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <UnifiedLayout currentPage="analytics">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -435,7 +432,6 @@ export default function AnalyticsPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </UnifiedLayout>
   )
 }

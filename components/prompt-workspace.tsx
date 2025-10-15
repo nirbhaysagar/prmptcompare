@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Search, LogOut } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export function PromptWorkspace() {
@@ -25,9 +25,6 @@ export function PromptWorkspace() {
   const deletePrompt = useDeletePrompt()
   const supabase = createClient()
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-  }
 
   const handleBenchmark = (prompt: any) => {
     setSelectedPrompt(prompt)
@@ -66,32 +63,10 @@ export function PromptWorkspace() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">PromptForge</h1>
-              <Badge variant="secondary" className="ml-3">
-                {user?.email}
-              </Badge>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" onClick={handleSignOut}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
+    <div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Prompts</CardTitle>
             </CardHeader>
@@ -176,7 +151,6 @@ export function PromptWorkspace() {
             ))}
           </div>
         )}
-      </main>
 
       {/* Create Prompt Dialog */}
       <CreatePromptDialog

@@ -19,7 +19,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react'
-import { Navigation } from '@/components/navigation'
+import { UnifiedLayout } from '@/components/unified-layout'
 
 interface PerformanceMetrics {
   model: string
@@ -187,10 +187,7 @@ export default function PerformanceAnalyticsPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <UnifiedLayout currentPage="performance">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -500,7 +497,6 @@ export default function PerformanceAnalyticsPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </UnifiedLayout>
   )
 }

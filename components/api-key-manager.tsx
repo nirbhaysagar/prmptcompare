@@ -209,7 +209,7 @@ export function ApiKeyManager() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
+          <div className="space-y-6">
             <div>
               <label htmlFor="apiKey" className="block text-sm font-semibold text-gray-900 mb-2">
                 API Key
@@ -221,7 +221,7 @@ export function ApiKeyManager() {
                   value={newApiKey}
                   onChange={(e) => setNewApiKey(e.target.value)}
                   placeholder={`sk-...`}
-                  className="pr-12 h-11 text-base"
+                  className="pr-12 h-12 text-base"
                 />
                 <button
                   type="button"
@@ -254,18 +254,18 @@ export function ApiKeyManager() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
               <Button 
                 variant="outline" 
                 onClick={() => setShowDialog(false)}
-                className="px-6"
+                className="px-6 h-10"
               >
                 Cancel
               </Button>
               <Button 
                 onClick={handleSaveApiKey}
                 disabled={!newApiKey.trim()}
-                className="bg-gray-900 hover:bg-gray-800 text-white px-6"
+                className="bg-gray-900 hover:bg-gray-800 text-white px-6 h-10"
               >
                 Save API Key
               </Button>

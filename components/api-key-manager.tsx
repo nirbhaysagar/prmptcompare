@@ -20,7 +20,8 @@ import {
   Trash2, 
   CheckCircle,
   AlertCircle,
-  Settings
+  Settings,
+  ExternalLink
 } from 'lucide-react'
 import { useApiKeys, useSaveApiKey, useDeleteApiKey } from '@/lib/queries/api-keys'
 
@@ -106,16 +107,18 @@ export function ApiKeyManager() {
           const isConfigured = !!apiKey
           
           return (
-            <Card key={provider.id} className="relative">
-              <CardHeader>
+            <Card key={provider.id} className={`relative transition-all hover:shadow-md ${
+              isConfigured ? 'border-green-200 bg-green-50/30' : 'border-gray-200'
+            }`}>
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${provider.color}`}>
-                      <Key className="w-5 h-5" />
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${provider.color} shadow-sm`}>
+                      <Key className="w-6 h-6" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{provider.name}</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-lg font-bold">{provider.name}</CardTitle>
+                      <CardDescription className="text-sm">
                         {provider.models.length} models available
                       </CardDescription>
                     </div>
@@ -124,23 +127,24 @@ export function ApiKeyManager() {
                   <div className="flex items-center gap-2">
                     {isConfigured ? (
                       <>
-                        <Badge className="bg-green-100 text-green-800">
+                        <Badge className="bg-green-100 text-green-800 border-green-300">
                           <CheckCircle className="w-3 h-3 mr-1" />
-                          Configured
+                          Active
                         </Badge>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveApiKey(provider.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </>
                     ) : (
                       <Button
-                        variant="outline"
-                        size="sm"
                         onClick={() => openDialog(provider.id)}
+                        size="sm"
+                        className="bg-gray-900 hover:bg-gray-800 text-white"
                       >
                         <Plus className="w-4 h-4 mr-1" />
                         Add Key
@@ -150,13 +154,17 @@ export function ApiKeyManager() {
                 </div>
               </CardHeader>
               
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="pt-0">
+                <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-1">Available Models:</p>
-                    <div className="flex flex-wrap gap-1">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">Available Models:</p>
+                    <div className="flex flex-wrap gap-2">
                       {provider.models.map(model => (
-                        <Badge key={model} variant="secondary" className="text-xs">
+                        <Badge 
+                          key={model} 
+                          variant="secondary" 
+                          className="text-xs bg-white border border-gray-200"
+                        >
                           {model}
                         </Badge>
                       ))}
@@ -164,12 +172,12 @@ export function ApiKeyManager() {
                   </div>
                   
                   {isConfigured && apiKey && (
-                    <div className="text-xs text-gray-600">
-                      <p>Added: {new Date(apiKey.created_at).toLocaleDateString()}</p>
+                    <div className="text-xs text-gray-600 bg-white p-2 rounded border border-gray-200">
+                      <p className="font-medium">✓ Configured on {new Date(apiKey.created_at).toLocaleDateString()}</p>
                     </div>
                   )}
                   
-                  <div className="pt-2">
+                  <div className="pt-2 border-t border-gray-200">
                     <a
                       href={`https://${provider.id === 'openai' ? 'platform.openai.com/api-keys' : 
                               provider.id === 'anthropic' ? 'console.anthropic.com' :
@@ -177,9 +185,10 @@ export function ApiKeyManager() {
                               'platform.deepseek.com'}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-blue-600 hover:text-blue-800 underline"
+                      className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
                     >
-                      Get your {provider.name} API key →
+                      Get your {provider.name} API key
+                      <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
                 </div>
@@ -191,18 +200,18 @@ export function ApiKeyManager() {
 
       {/* Add API Key Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Add {getProviderInfo(selectedProvider)?.name} API Key</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl">Add {getProviderInfo(selectedProvider)?.name} API Key</DialogTitle>
+            <DialogDescription className="text-base">
               Enter your API key for {getProviderInfo(selectedProvider)?.name}. 
-              This will be stored securely and used for benchmarking.
+              This will be stored securely in your browser and used for benchmarking.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-6 py-4">
             <div>
-              <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="apiKey" className="block text-sm font-semibold text-gray-900 mb-2">
                 API Key
               </label>
               <div className="relative">
@@ -211,37 +220,52 @@ export function ApiKeyManager() {
                   type={showKey ? 'text' : 'password'}
                   value={newApiKey}
                   onChange={(e) => setNewApiKey(e.target.value)}
-                  placeholder={`Enter your ${getProviderInfo(selectedProvider)?.name} API key`}
-                  className="pr-10"
+                  placeholder={`sk-...`}
+                  className="pr-12 h-11 text-base"
                 />
                 <button
                   type="button"
                   onClick={() => setShowKey(!showKey)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  title={showKey ? 'Hide key' : 'Show key'}
                 >
-                  {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Your API key starts with <code className="bg-gray-100 px-1 py-0.5 rounded">sk-</code>
+              </p>
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
-                <div className="text-sm text-yellow-800">
-                  <p className="font-medium">Security Notice:</p>
-                  <p>Your API key is encrypted and stored securely. PromptForge will only use it for the benchmarking features you enable.</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Key className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="text-sm">
+                  <p className="font-semibold text-blue-900 mb-1">How it works:</p>
+                  <ul className="text-blue-800 space-y-1">
+                    <li>• Your key is stored locally in your browser</li>
+                    <li>• Used only for benchmarking when you run tests</li>
+                    <li>• You pay providers directly at their rates</li>
+                    <li>• No markup or data sharing with PromptForge</li>
+                  </ul>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowDialog(false)}>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowDialog(false)}
+                className="px-6"
+              >
                 Cancel
               </Button>
               <Button 
                 onClick={handleSaveApiKey}
                 disabled={!newApiKey.trim()}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-gray-900 hover:bg-gray-800 text-white px-6"
               >
                 Save API Key
               </Button>

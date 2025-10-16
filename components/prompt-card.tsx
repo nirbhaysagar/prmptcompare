@@ -3,9 +3,8 @@
 import { useState } from 'react'
 import { Tables, UpdateTables } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Edit, Trash2, Copy, Eye, EyeOff, Zap } from 'lucide-react'
+import { Edit, Trash2, Copy, MoreHorizontal, Play } from 'lucide-react'
 
 type Prompt = Tables<'prompts'>
 
@@ -17,222 +16,127 @@ interface PromptCardProps {
 }
 
 export function PromptCard({ prompt, onUpdate, onDelete, onBenchmark }: PromptCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [editData, setEditData] = useState({
-    title: prompt.title,
-    description: prompt.description || '',
-    content: prompt.content,
-    tags: prompt.tags.join(', '),
-    is_public: prompt.is_public,
-  })
-
-  const handleSave = () => {
-    const tagsArray = editData.tags
-      .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0)
-
-    onUpdate({
-      id: prompt.id,
-      title: editData.title,
-      description: editData.description || null,
-      content: editData.content,
-      tags: tagsArray,
-      is_public: editData.is_public,
-    })
-    setIsEditing(false)
-  }
-
-  const handleCancel = () => {
-    setEditData({
-      title: prompt.title,
-      description: prompt.description || '',
-      content: prompt.content,
-      tags: prompt.tags.join(', '),
-      is_public: prompt.is_public,
-    })
-    setIsEditing(false)
-  }
+  const [showMenu, setShowMenu] = useState(false)
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(prompt.content)
-    // You could add a toast notification here
   }
 
-  const handleTogglePublic = () => {
-    onUpdate({
-      id: prompt.id,
-      is_public: !prompt.is_public,
-    })
-  }
-
-  const truncateContent = (content: string, maxLength: number = 150) => {
+  const truncateContent = (content: string, maxLength: number = 120) => {
     if (content.length <= maxLength) return content
     return content.substring(0, maxLength) + '...'
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            {isEditing ? (
-              <input
-                value={editData.title}
-                onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
-                className="text-lg font-semibold bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 w-full"
-              />
-            ) : (
-              <CardTitle className="text-lg">{prompt.title}</CardTitle>
-            )}
-            {isEditing ? (
-              <textarea
-                value={editData.description}
-                onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Description (optional)"
-                className="text-sm text-gray-600 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 w-full mt-2 resize-none"
-                rows={2}
-              />
-            ) : (
-              prompt.description && (
-                <CardDescription className="mt-2">{prompt.description}</CardDescription>
-              )
-            )}
-          </div>
-          <div className="flex items-center space-x-1 ml-2">
+    <div className="group border border-gray-200 rounded-lg p-6 hover:border-gray-900 hover:shadow-sm transition-all">
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
+            {prompt.title}
+          </h3>
+          {prompt.description && (
+            <p className="text-sm text-gray-600 line-clamp-2">
+              {prompt.description}
+            </p>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => onBenchmark && onBenchmark(prompt)}
+            size="sm"
+            className="bg-gray-900 hover:bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Play className="w-4 h-4 mr-1" />
+            Test
+          </Button>
+          
+          <div className="relative">
             <Button
               variant="ghost"
-              size="icon"
-              onClick={handleTogglePublic}
-              title={prompt.is_public ? 'Make private' : 'Make public'}
+              size="sm"
+              onClick={() => setShowMenu(!showMenu)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              {prompt.is_public ? (
-                <Eye className="w-4 h-4 text-green-600" />
-              ) : (
-                <EyeOff className="w-4 h-4 text-gray-400" />
-              )}
+              <MoreHorizontal className="w-4 h-4" />
             </Button>
-          </div>
-        </div>
-
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2 mt-3">
-          {isEditing ? (
-            <input
-              value={editData.tags}
-              onChange={(e) => setEditData(prev => ({ ...prev, tags: e.target.value }))}
-              placeholder="Tags (comma-separated)"
-              className="text-sm bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 flex-1 min-w-0"
-            />
-          ) : (
-            prompt.tags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))
-          )}
-        </div>
-      </CardHeader>
-
-      <CardContent className="flex-1">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Content:</span>
-            {!isEditing && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopy}
-                className="h-6 px-2 text-xs"
-              >
-                <Copy className="w-3 h-3 mr-1" />
-                Copy
-              </Button>
+            
+            {showMenu && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setShowMenu(false)}
+                />
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
+                  <button
+                    onClick={() => {
+                      handleCopy()
+                      setShowMenu(false)
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy content
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Edit functionality
+                      setShowMenu(false)
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </button>
+                  <hr className="my-1 border-gray-200" />
+                  <button
+                    onClick={() => {
+                      onDelete(prompt.id)
+                      setShowMenu(false)
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </div>
+              </>
             )}
           </div>
-          
-          {isEditing ? (
-            <textarea
-              value={editData.content}
-              onChange={(e) => setEditData(prev => ({ ...prev, content: e.target.value }))}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              rows={isExpanded ? 8 : 4}
-              placeholder="Enter your prompt content..."
-            />
-          ) : (
-            <div className="bg-gray-50 p-3 rounded-md">
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                {isExpanded ? prompt.content : truncateContent(prompt.content)}
-              </p>
-              {prompt.content.length > 150 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="mt-2 h-6 px-2 text-xs text-blue-600 hover:text-blue-700"
-                >
-                  {isExpanded ? 'Show less' : 'Show more'}
-                </Button>
-              )}
-            </div>
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <p className="text-sm text-gray-700 line-clamp-3">
+          {truncateContent(prompt.content)}
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="flex flex-wrap gap-2">
+          {prompt.tags.slice(0, 3).map((tag, index) => (
+            <Badge 
+              key={index} 
+              variant="secondary" 
+              className="text-xs bg-gray-100 text-gray-700 border-0"
+            >
+              {tag}
+            </Badge>
+          ))}
+          {prompt.tags.length > 3 && (
+            <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700 border-0">
+              +{prompt.tags.length - 3}
+            </Badge>
           )}
         </div>
-
-        {/* Metadata */}
-        <div className="text-xs text-gray-500 mt-4 pt-3 border-t">
-          Created: {new Date(prompt.created_at).toLocaleDateString()}
-          {prompt.updated_at !== prompt.created_at && (
-            <span className="ml-2">
-              • Updated: {new Date(prompt.updated_at).toLocaleDateString()}
-            </span>
-          )}
-        </div>
-      </CardContent>
-
-      <CardFooter className="flex justify-between">
-        {isEditing ? (
-          <div className="flex space-x-2">
-            <Button size="sm" onClick={handleSave}>
-              Save
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-          </div>
-        ) : (
-          <div className="flex space-x-2">
-            {onBenchmark && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onBenchmark(prompt)}
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-              >
-                <Zap className="w-3 h-3 mr-1" />
-                Benchmark
-              </Button>
-            )}
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsEditing(true)}
-            >
-              <Edit className="w-3 h-3 mr-1" />
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onDelete(prompt.id)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="w-3 h-3 mr-1" />
-              Delete
-            </Button>
-          </div>
-        )}
-      </CardFooter>
-    </Card>
+        
+        <span className="text-xs text-gray-500">
+          {new Date(prompt.created_at).toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric' 
+          })}
+        </span>
+      </div>
+    </div>
   )
 }

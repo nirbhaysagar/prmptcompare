@@ -22,14 +22,7 @@ import {
   AlertCircle,
   Settings
 } from 'lucide-react'
-
-interface ApiKey {
-  id: string
-  provider: string
-  name: string
-  isConfigured: boolean
-  lastUsed?: string
-}
+import { useApiKeys, useSaveApiKey, useDeleteApiKey } from '@/lib/queries/api-keys'
 
 const PROVIDERS = [
   { id: 'openai', name: 'OpenAI', models: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'], color: 'bg-green-100 text-green-800' },
@@ -39,12 +32,9 @@ const PROVIDERS = [
 ]
 
 export function ApiKeyManager() {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([
-    { id: '1', provider: 'openai', name: 'OpenAI', isConfigured: false },
-    { id: '2', provider: 'anthropic', name: 'Anthropic', isConfigured: false },
-    { id: '3', provider: 'google', name: 'Google', isConfigured: false },
-    { id: '4', provider: 'deepseek', name: 'DeepSeek', isConfigured: false },
-  ])
+  const { data: apiKeys = [] } = useApiKeys()
+  const saveApiKey = useSaveApiKey()
+  const deleteApiKey = useDeleteApiKey()
   
   const [showDialog, setShowDialog] = useState(false)
   const [selectedProvider, setSelectedProvider] = useState<string>('')
@@ -54,14 +44,10 @@ export function ApiKeyManager() {
   const handleSaveApiKey = () => {
     if (!selectedProvider || !newApiKey.trim()) return
 
-    setApiKeys(prev => prev.map(key => 
-      key.provider === selectedProvider 
-        ? { ...key, isConfigured: true, lastUsed: new Date().toISOString() }
-        : key
-    ))
-    
-    // In a real app, you'd save this securely to your database
-    localStorage.setItem(`api_key_${selectedProvider}`, newApiKey)
+    saveApiKey.mutate({
+      provider: selectedProvider,
+      key: newApiKey,
+    })
     
     setShowDialog(false)
     setNewApiKey('')
@@ -69,20 +55,14 @@ export function ApiKeyManager() {
   }
 
   const handleRemoveApiKey = (provider: string) => {
-    setApiKeys(prev => prev.map(key => 
-      key.provider === provider 
-        ? { ...key, isConfigured: false, lastUsed: undefined }
-        : key
-    ))
-    
-    localStorage.removeItem(`api_key_${provider}`)
+    deleteApiKey.mutate(provider)
   }
 
   const openDialog = (provider: string) => {
     setSelectedProvider(provider)
-    const existingKey = localStorage.getItem(`api_key_${provider}`)
+    const existingKey = apiKeys.find(k => k.provider === provider)
     if (existingKey) {
-      setNewApiKey(existingKey)
+      setNewApiKey(existingKey.key)
     }
     setShowDialog(true)
   }
@@ -121,26 +101,28 @@ export function ApiKeyManager() {
 
       {/* API Keys Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {apiKeys.map((apiKey) => {
-          const provider = getProviderInfo(apiKey.provider)
+        {PROVIDERS.map((provider) => {
+          const apiKey = apiKeys.find(k => k.provider === provider.id)
+          const isConfigured = !!apiKey
+          
           return (
-            <Card key={apiKey.id} className="relative">
+            <Card key={provider.id} className="relative">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${provider?.color}`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${provider.color}`}>
                       <Key className="w-5 h-5" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{apiKey.name}</CardTitle>
+                      <CardTitle className="text-lg">{provider.name}</CardTitle>
                       <CardDescription>
-                        {provider?.models.length} models available
+                        {provider.models.length} models available
                       </CardDescription>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    {apiKey.isConfigured ? (
+                    {isConfigured ? (
                       <>
                         <Badge className="bg-green-100 text-green-800">
                           <CheckCircle className="w-3 h-3 mr-1" />
@@ -149,7 +131,7 @@ export function ApiKeyManager() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleRemoveApiKey(apiKey.provider)}
+                          onClick={() => handleRemoveApiKey(provider.id)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -158,7 +140,7 @@ export function ApiKeyManager() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => openDialog(apiKey.provider)}
+                        onClick={() => openDialog(provider.id)}
                       >
                         <Plus className="w-4 h-4 mr-1" />
                         Add Key
@@ -173,7 +155,7 @@ export function ApiKeyManager() {
                   <div>
                     <p className="text-sm font-medium text-gray-700 mb-1">Available Models:</p>
                     <div className="flex flex-wrap gap-1">
-                      {provider?.models.map(model => (
+                      {provider.models.map(model => (
                         <Badge key={model} variant="secondary" className="text-xs">
                           {model}
                         </Badge>
@@ -181,23 +163,23 @@ export function ApiKeyManager() {
                     </div>
                   </div>
                   
-                  {apiKey.isConfigured && (
+                  {isConfigured && apiKey && (
                     <div className="text-xs text-gray-600">
-                      <p>Last used: {apiKey.lastUsed ? new Date(apiKey.lastUsed).toLocaleDateString() : 'Never'}</p>
+                      <p>Added: {new Date(apiKey.created_at).toLocaleDateString()}</p>
                     </div>
                   )}
                   
                   <div className="pt-2">
                     <a
-                      href={`https://${apiKey.provider === 'openai' ? 'platform.openai.com/api-keys' : 
-                              apiKey.provider === 'anthropic' ? 'console.anthropic.com' :
-                              apiKey.provider === 'google' ? 'makersuite.google.com/app/apikey' :
+                      href={`https://${provider.id === 'openai' ? 'platform.openai.com/api-keys' : 
+                              provider.id === 'anthropic' ? 'console.anthropic.com' :
+                              provider.id === 'google' ? 'makersuite.google.com/app/apikey' :
                               'platform.deepseek.com'}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-blue-600 hover:text-blue-800 underline"
                     >
-                      Get your {apiKey.name} API key →
+                      Get your {provider.name} API key →
                     </a>
                   </div>
                 </div>

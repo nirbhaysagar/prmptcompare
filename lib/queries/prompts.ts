@@ -9,8 +9,10 @@ type PromptUpdate = UpdateTables<'prompts'>
 const supabase = createClient()
 const isDemoMode = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true'
 
-// Demo mode storage key
+// Demo mode storage keys
 const DEMO_PROMPTS_KEY = 'promptforge_demo_prompts'
+const DEMO_API_KEYS_KEY = 'promptforge_demo_api_keys'
+const DEMO_BENCHMARKS_KEY = 'promptforge_demo_benchmarks'
 
 // Fetch all prompts for the current user
 export function usePrompts() {

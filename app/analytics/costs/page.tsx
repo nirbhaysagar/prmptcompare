@@ -1,430 +1,152 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Download, 
-  Filter, 
-  Search, 
-  Calendar,
-  DollarSign,
-  Clock,
-  Zap,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart
-} from 'lucide-react'
 import { UnifiedLayout } from '@/components/unified-layout'
-
-interface CostBreakdown {
-  date: string
-  openai: number
-  anthropic: number
-  google: number
-  deepseek: number
-  total: number
-}
-
-interface UsageStats {
-  totalRequests: number
-  totalCost: number
-  avgCostPerRequest: number
-  peakUsageDay: string
-  mostExpensiveModel: string
-  costTrend: 'up' | 'down'
-  trendPercentage: number
-}
+import { DollarSign, TrendingDown, BarChart3 } from 'lucide-react'
 
 export default function CostAnalyticsPage() {
-  const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
-  const [costBreakdown, setCostBreakdown] = useState<CostBreakdown[]>([])
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d')
-  const [selectedProvider, setSelectedProvider] = useState<string>('all')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadCostData = async () => {
-      setLoading(true)
-      await new Promise(resolve => setTimeout(resolve, 800))
-      
-      // Mock cost data
-      const mockStats: UsageStats = {
-        totalRequests: 1247,
-        totalCost: 47.23,
-        avgCostPerRequest: 0.038,
-        peakUsageDay: '2024-01-15',
-        mostExpensiveModel: 'GPT-4',
-        costTrend: 'down',
-        trendPercentage: 12.5
-      }
-
-      const mockBreakdown: CostBreakdown[] = Array.from({ length: 30 }, (_, i) => ({
-        date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        openai: Math.random() * 3 + 0.5,
-        anthropic: Math.random() * 2 + 0.3,
-        google: Math.random() * 1.5 + 0.2,
-        deepseek: Math.random() * 0.8 + 0.1,
-        total: 0
-      })).map(day => ({
-        ...day,
-        total: day.openai + day.anthropic + day.google + day.deepseek
-      }))
-
-      setUsageStats(mockStats)
-      setCostBreakdown(mockBreakdown)
-      setLoading(false)
-    }
-
-    loadCostData()
-  }, [timeRange])
+    setTimeout(() => setLoading(false), 500)
+  }, [])
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
-              ))}
-            </div>
+      <UnifiedLayout currentPage="costs">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-gray-900 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="text-sm text-gray-600">Loading costs...</p>
           </div>
         </div>
-      </div>
+      </UnifiedLayout>
     )
-  }
-
-  if (!usageStats) return null
-
-  const totalCost = costBreakdown.reduce((sum, day) => sum + day.total, 0)
-  const openaiCost = costBreakdown.reduce((sum, day) => sum + day.openai, 0)
-  const anthropicCost = costBreakdown.reduce((sum, day) => sum + day.anthropic, 0)
-  const googleCost = costBreakdown.reduce((sum, day) => sum + day.google, 0)
-  const deepseekCost = costBreakdown.reduce((sum, day) => sum + day.deepseek, 0)
-
-  const providerData = [
-    { name: 'OpenAI', cost: openaiCost, color: 'bg-green-500', percentage: (openaiCost / totalCost) * 100 },
-    { name: 'Anthropic', cost: anthropicCost, color: 'bg-orange-500', percentage: (anthropicCost / totalCost) * 100 },
-    { name: 'Google', cost: googleCost, color: 'bg-blue-500', percentage: (googleCost / totalCost) * 100 },
-    { name: 'DeepSeek', cost: deepseekCost, color: 'bg-purple-500', percentage: (deepseekCost / totalCost) * 100 }
-  ].sort((a, b) => b.cost - a.cost)
-
-  const exportData = () => {
-    const csvContent = [
-      ['Date', 'OpenAI', 'Anthropic', 'Google', 'DeepSeek', 'Total'],
-      ...costBreakdown.map(day => [
-        day.date,
-        day.openai.toFixed(4),
-        day.anthropic.toFixed(4),
-        day.google.toFixed(4),
-        day.deepseek.toFixed(4),
-        day.total.toFixed(4)
-      ])
-    ].map(row => row.join(',')).join('\n')
-
-    const blob = new Blob([csvContent], { type: 'text/csv' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `cost-analytics-${timeRange}.csv`
-    a.click()
-    window.URL.revokeObjectURL(url)
   }
 
   return (
     <UnifiedLayout currentPage="costs">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Cost Analytics</h1>
-            <p className="text-gray-600 mt-1">Track and optimize your AI API spending</p>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Cost Analytics</h1>
+          <p className="text-gray-600">Track and optimize your API spending</p>
+        </div>
+
+        {/* Cost Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="border border-gray-200 rounded-lg p-6">
+            <p className="text-sm text-gray-600 mb-1">Total Spend</p>
+            <p className="text-3xl font-bold text-gray-900">$47.23</p>
+            <p className="text-xs text-green-600 mt-2 flex items-center">
+              <TrendingDown className="w-3 h-3 mr-1" />
+              12% lower than last month
+            </p>
           </div>
+
+          <div className="border border-gray-200 rounded-lg p-6">
+            <p className="text-sm text-gray-600 mb-1">Avg per Request</p>
+            <p className="text-3xl font-bold text-gray-900">$0.038</p>
+            <p className="text-xs text-gray-600 mt-2">Across all models</p>
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-6">
+            <p className="text-sm text-gray-600 mb-1">This Month</p>
+            <p className="text-3xl font-bold text-gray-900">$12.47</p>
+            <p className="text-xs text-gray-600 mt-2">1,247 requests</p>
+          </div>
+        </div>
+
+        {/* Provider Breakdown */}
+        <div className="border border-gray-200 rounded-lg p-6 mb-12">
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">Cost by Provider</h3>
+          <p className="text-sm text-gray-600 mb-6">Monthly spending breakdown</p>
           
-          <div className="flex items-center gap-3">
-            <select
-              value={selectedProvider}
-              onChange={(e) => setSelectedProvider(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Providers</option>
-              <option value="openai">OpenAI</option>
-              <option value="anthropic">Anthropic</option>
-              <option value="google">Google</option>
-              <option value="deepseek">DeepSeek</option>
-            </select>
-            
-            {(['7d', '30d', '90d'] as const).map((range) => (
-              <button
-                key={range}
-                onClick={() => setTimeRange(range)}
-                className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                  timeRange === range
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                }`}
-              >
-                {range}
-              </button>
+          <div className="space-y-4">
+            {[
+              { provider: 'OpenAI', cost: 18.45, percentage: 39, color: 'bg-gray-900' },
+              { provider: 'Anthropic', cost: 15.23, percentage: 32, color: 'bg-gray-700' },
+              { provider: 'Google', cost: 9.87, percentage: 21, color: 'bg-gray-500' },
+              { provider: 'DeepSeek', cost: 3.68, percentage: 8, color: 'bg-gray-400' },
+            ].map((item) => (
+              <div key={item.provider}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-900">{item.provider}</span>
+                    <span className="text-xs text-gray-600">{item.percentage}%</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">${item.cost.toFixed(2)}</span>
+                </div>
+                <div className="w-full bg-gray-100 rounded-full h-2">
+                  <div
+                    className={`${item.color} h-2 rounded-full transition-all`}
+                    style={{ width: `${item.percentage}%` }}
+                  />
+                </div>
+              </div>
             ))}
-            
-            <Button onClick={exportData} variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
           </div>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Cost</p>
-                  <p className="text-2xl font-bold text-gray-900">${usageStats.totalCost.toFixed(2)}</p>
-                </div>
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-red-600" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center">
-                {usageStats.costTrend === 'down' ? (
-                  <>
-                    <TrendingDown className="w-4 h-4 text-green-500 mr-1" />
-                    <span className="text-sm text-green-600 font-medium">
-                      {usageStats.trendPercentage}% decrease
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <TrendingUp className="w-4 h-4 text-red-500 mr-1" />
-                    <span className="text-sm text-red-600 font-medium">
-                      {usageStats.trendPercentage}% increase
-                    </span>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                  <p className="text-2xl font-bold text-gray-900">{usageStats.totalRequests.toLocaleString()}</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-              <div className="mt-4 text-sm text-gray-600">
-                Avg: ${usageStats.avgCostPerRequest.toFixed(4)} per request
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Most Expensive Model</p>
-                  <p className="text-lg font-bold text-gray-900">{usageStats.mostExpensiveModel}</p>
-                </div>
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-6 h-6 text-yellow-600" />
-                </div>
-              </div>
-              <div className="mt-4 text-sm text-gray-600">
-                Peak usage: {usageStats.peakUsageDay}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Cost Breakdown */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Daily Cost Chart */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
-                Daily Cost Breakdown
-              </CardTitle>
-              <CardDescription>Cost per provider over time</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-end justify-between gap-1">
-                {costBreakdown.slice(-14).map((day, index) => {
-                  const maxCost = Math.max(...costBreakdown.map(d => d.total))
-                  const openaiHeight = (day.openai / maxCost) * 100
-                  const anthropicHeight = (day.anthropic / maxCost) * 100
-                  const googleHeight = (day.google / maxCost) * 100
-                  const deepseekHeight = (day.deepseek / maxCost) * 100
-                  
-                  return (
-                    <div key={index} className="flex flex-col items-center gap-1">
-                      <div className="flex flex-col-reverse w-6 h-20">
-                        <div className="bg-green-500 w-full" style={{ height: `${openaiHeight}%` }} />
-                        <div className="bg-orange-500 w-full" style={{ height: `${anthropicHeight}%` }} />
-                        <div className="bg-blue-500 w-full" style={{ height: `${googleHeight}%` }} />
-                        <div className="bg-purple-500 w-full" style={{ height: `${deepseekHeight}%` }} />
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        {new Date(day.date).getDate()}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-              <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-                <span>Last 14 days</span>
-                <span>${totalCost.toFixed(2)} total</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Provider Breakdown */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <PieChart className="w-5 h-5" />
-                Provider Breakdown
-              </CardTitle>
-              <CardDescription>Cost distribution by provider</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {providerData.map((provider) => (
-                  <div key={provider.name} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-900">{provider.name}</span>
-                      <span className="text-sm text-gray-600">${provider.cost.toFixed(2)}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`${provider.color} h-2 rounded-full transition-all`}
-                        style={{ width: `${provider.percentage}%` }}
-                      />
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {provider.percentage.toFixed(1)}% of total cost
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Daily Costs */}
+        <div className="border border-gray-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">Daily Spending</h3>
+          <p className="text-sm text-gray-600 mb-6">Cost trends over time</p>
+          
+          <div className="h-48 flex items-end justify-between gap-2">
+            {[1.2, 1.8, 1.5, 2.1, 2.5, 1.9, 2.3, 2.8, 2.4, 3.2, 2.9, 3.5, 4.1, 3.7].map((cost, i) => (
+              <div
+                key={i}
+                className="flex-1 bg-gray-900 rounded-t hover:bg-gray-700 transition-colors cursor-pointer"
+                style={{ height: `${(cost / 4.1) * 100}%` }}
+                title={`$${cost.toFixed(2)}`}
+              />
+            ))}
+          </div>
+          <div className="flex justify-between mt-4">
+            <p className="text-xs text-gray-500">Last 14 days</p>
+            <p className="text-xs text-gray-900 font-medium">Total: $35.89</p>
+          </div>
         </div>
 
         {/* Cost Optimization Tips */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingDown className="w-5 h-5" />
-              Cost Optimization Recommendations
-            </CardTitle>
-            <CardDescription>AI-powered suggestions to reduce your API costs</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <DollarSign className="w-5 h-5 text-green-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-green-900">Switch to Cheaper Models</h4>
-                    <p className="text-sm text-green-800 mt-1">
-                      Consider using GPT-3.5-Turbo instead of GPT-4 for simple tasks. 
-                      Potential savings: ${(openaiCost * 0.4).toFixed(2)}/month
-                    </p>
-                  </div>
-                </div>
+        <div className="mt-12 border border-gray-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">Optimization Tips</h3>
+          <p className="text-sm text-gray-600 mb-6">Ways to reduce your API costs</p>
+          
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <DollarSign className="w-4 h-4 text-green-700" />
               </div>
-              
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-blue-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-blue-900">Batch Processing</h4>
-                    <p className="text-sm text-blue-800 mt-1">
-                      Batch similar prompts together to reduce API call overhead. 
-                      Estimated savings: 15-20% on total costs.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Zap className="w-5 h-5 text-purple-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-purple-900">Optimize Prompt Length</h4>
-                    <p className="text-sm text-purple-800 mt-1">
-                      Shorter prompts reduce token usage. Review prompts longer than 100 tokens 
-                      for optimization opportunities.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <BarChart3 className="w-5 h-5 text-orange-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-orange-900">Usage Monitoring</h4>
-                    <p className="text-sm text-orange-800 mt-1">
-                      Set up alerts for unusual spending patterns. 
-                      Current peak usage detected on {usageStats.peakUsageDay}.
-                    </p>
-                  </div>
-                </div>
+              <div>
+                <p className="font-medium text-gray-900 mb-1">Use GPT-3.5 for simple tasks</p>
+                <p className="text-sm text-gray-600">Could save ~$8/month by switching simple prompts</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Detailed Cost Table */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Detailed Cost Breakdown</CardTitle>
-            <CardDescription>Daily costs by provider for the selected period</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Date</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">OpenAI</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Anthropic</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Google</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">DeepSeek</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {costBreakdown.slice(-10).map((day) => (
-                    <tr key={day.date} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4 text-gray-700">
-                        {new Date(day.date).toLocaleDateString()}
-                      </td>
-                      <td className="py-3 px-4 text-gray-700">${day.openai.toFixed(3)}</td>
-                      <td className="py-3 px-4 text-gray-700">${day.anthropic.toFixed(3)}</td>
-                      <td className="py-3 px-4 text-gray-700">${day.google.toFixed(3)}</td>
-                      <td className="py-3 px-4 text-gray-700">${day.deepseek.toFixed(3)}</td>
-                      <td className="py-3 px-4 font-medium text-gray-900">${day.total.toFixed(3)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            
+            <div className="flex gap-4">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <TrendingDown className="w-4 h-4 text-blue-700" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900 mb-1">Batch similar requests</p>
+                <p className="text-sm text-gray-600">Reduce overhead by grouping related prompts</p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+            
+            <div className="flex gap-4">
+              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <BarChart3 className="w-4 h-4 text-purple-700" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900 mb-1">Optimize prompt length</p>
+                <p className="text-sm text-gray-600">Shorter prompts mean lower token costs</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </UnifiedLayout>
   )
 }

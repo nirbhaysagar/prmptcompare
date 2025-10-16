@@ -7,7 +7,7 @@ import { CreatePromptDialog } from '@/components/create-prompt-dialog'
 import { BenchmarkDialog } from '@/components/benchmark-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, Zap } from 'lucide-react'
 
 export function PromptWorkspace() {
   const disableAuth = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true'

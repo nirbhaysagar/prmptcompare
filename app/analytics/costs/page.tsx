@@ -26,15 +26,15 @@ export default function CostAnalyticsPage() {
 
   return (
     <UnifiedLayout currentPage="costs">
-      <div className="max-w-6xl mx-auto">
+      <div className="space-y-8">
         {/* Header */}
-        <div className="mb-8">
+        <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Cost Analytics</h1>
           <p className="text-gray-600">Track and optimize your API spending</p>
         </div>
 
         {/* Cost Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="border border-gray-200 rounded-lg p-6">
             <p className="text-sm text-gray-600 mb-1">Total Spend</p>
             <p className="text-3xl font-bold text-gray-900">$47.23</p>

@@ -26,15 +26,15 @@ export default function AnalyticsPage() {
 
   return (
     <UnifiedLayout currentPage="analytics">
-      <div className="max-w-6xl mx-auto">
+      <div className="space-y-8">
         {/* Header */}
-        <div className="mb-8">
+        <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics</h1>
           <p className="text-gray-600">Track your prompt performance and usage</p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="border border-gray-200 rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -87,7 +87,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Usage Chart */}
           <div className="border border-gray-200 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Usage Trends</h3>

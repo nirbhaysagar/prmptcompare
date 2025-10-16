@@ -25,7 +25,7 @@ export function UnifiedLayout({ children, currentPage = 'dashboard' }: UnifiedLa
     { href: '/analytics', label: 'Analytics', icon: BarChart3, key: 'analytics' },
     { href: '/analytics/costs', label: 'Costs', icon: DollarSign, key: 'costs' },
     { href: '/analytics/performance', label: 'Performance', icon: BarChart3, key: 'performance' },
-    { href: '/settings', label: 'Settings', icon: Key, key: 'settings' },
+    { href: '/settings', label: 'API Keys', icon: Key, key: 'settings' },
   ]
 
   return (

@@ -63,6 +63,7 @@ export function UnifiedLayout({ children, currentPage = 'dashboard' }: UnifiedLa
               <Link
                 key={item.key}
                 href={item.href}
+                prefetch={true}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-gray-900 text-white'

@@ -14,13 +14,16 @@ interface UnifiedLayoutProps {
 }
 
 export function UnifiedLayout({ children, currentPage = 'dashboard' }: UnifiedLayoutProps) {
-  const { user } = useAuth()
+  const disableAuth = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true'
+  const { user } = disableAuth ? { user: { email: 'demo@promptforge.com' } } : useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const supabase = createClient()
   const router = useRouter()
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
+    if (!disableAuth) {
+      await supabase.auth.signOut()
+    }
     router.push('/')
   }
 

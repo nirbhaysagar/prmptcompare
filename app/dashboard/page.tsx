@@ -1,33 +1,21 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/components/auth-provider'
 import { UnifiedLayout } from '@/components/unified-layout'
 import { PromptWorkspace } from '@/components/prompt-workspace'
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth()
-  const router = useRouter()
+  const disableAuth = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true'
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login')
-    }
-  }, [user, loading, router])
-
-  if (loading) {
+  // Skip auth checks if disabled
+  if (disableAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
+      <UnifiedLayout currentPage="dashboard">
+        <PromptWorkspace />
+      </UnifiedLayout>
     )
   }
 
-  if (!user) {
-    return null
-  }
-
+  // Original auth logic for when auth is enabled
   return (
     <UnifiedLayout currentPage="dashboard">
       <PromptWorkspace />

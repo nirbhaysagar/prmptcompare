@@ -27,7 +27,8 @@ import {
 } from 'lucide-react'
 
 export function PromptWorkspace() {
-  const { user } = useAuth()
+  const disableAuth = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true'
+  const { user } = disableAuth ? { user: { email: 'demo@promptforge.com' } } : useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showBenchmarkDialog, setShowBenchmarkDialog] = useState(false)

@@ -1,4 +1,31 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
 export default function LandingPage() {
+  const router = useRouter()
+  const disableAuth = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true'
+
+  useEffect(() => {
+    // If auth is disabled, redirect directly to dashboard
+    if (disableAuth) {
+      router.push('/dashboard')
+    }
+  }, [disableAuth, router])
+
+  // If auth is disabled, show loading while redirecting
+  if (disableAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading PromptForge...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}

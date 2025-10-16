@@ -42,14 +42,16 @@ export function PromptCard({ prompt, onUpdate, onDelete, onBenchmark }: PromptCa
         </div>
         
         <div className="flex items-center gap-2">
-          <Button
-            onClick={() => onBenchmark && onBenchmark(prompt)}
-            size="sm"
-            className="bg-gray-900 hover:bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <Play className="w-4 h-4 mr-1" />
-            Test
-          </Button>
+          {onBenchmark && (
+            <Button
+              onClick={() => onBenchmark(prompt)}
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Play className="w-4 h-4 mr-1" />
+              Benchmark
+            </Button>
+          )}
           
           <div className="relative">
             <Button
